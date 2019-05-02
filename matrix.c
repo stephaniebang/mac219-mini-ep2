@@ -62,7 +62,7 @@ void matrix_dgemm_1(unsigned n, double *restrict _C, double *restrict _A, double
             for (int k = 0; k < n; ++k)
                 sum += A(j, k)*col[k];
 
-           C(j, i) = sum;
+            C(j, i) = sum;
         }
     }
 
@@ -83,6 +83,24 @@ void matrix_dgemm_2(unsigned n, double *restrict _C, double *restrict _A, double
      * apenas 1 segundo ou 2.
      */
     /* Seu código aqui. */
+    unsigned blockSize = 128;
+    unsigned aaa = 16;
+
+    for (int i = 0; i < aaa; ++i) {
+        double col[blockSize];
+
+        for (int j = 0; j < blockSize; ++j)
+            col[j] = B(j, i);
+
+        for (int j = 0; j < blockSize; ++j) {
+            double sum = 0;
+
+            for (int k = 0; k < n; ++k)
+                sum += A(j, k)*col[k];
+
+            C(j, i) += sum;
+        }
+    }
 
     #undef A
     #undef B
