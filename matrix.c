@@ -6,6 +6,7 @@
 /* Módulo de x*/
 #define ABS(x) ((x > 0)? (x): -(x))
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
 
 void matrix_fill_rand(unsigned n, double *restrict _A)
 {
@@ -53,9 +54,12 @@ void matrix_dgemm_1(unsigned n, double *restrict _C, double *restrict _A, double
 
     for (int i = 0; i < n; ++i) {
         double col[n];
+
+        // Salva a i-esima coluna de B em col
         for (int j = 0; j < n; ++j)
             col[j] = B(j, i);
 
+        // Calcula a i-esima coluna de C 
         for (int j = 0; j < n; ++j) {
             double sum = 0;
 
@@ -83,22 +87,32 @@ void matrix_dgemm_2(unsigned n, double *restrict _C, double *restrict _A, double
      * apenas 1 segundo ou 2.
      */
     /* Seu código aqui. */
+
+    // Tamanho do bloco (espera-se que n seja potencia de 2)
     unsigned blockSize = 128;
-    unsigned aaa = 16;
 
-    for (int i = 0; i < aaa; ++i) {
-        double col[blockSize];
+    // Loop de cada 'coluna de blocos'
+    for (int j = 0; j < n; j += blockSize) {
+        // Loop de cada bloco da j-esima 'coluna de blocos'
+        for (int i = 0; i < n; i += blockSize) {
+            // Loop de cada coluna do bloco atual
+            for (int jj = 0; jj < blockSize; jj++) {
+                double col[blockSize];
 
-        for (int j = 0; j < blockSize; ++j)
-            col[j] = B(j, i);
+                // Salva a jj-esima coluna do bloco atual em B
+                for (int ii = 0; ii < blockSize; ++ii)
+                    col[ii] = B(i + ii, j+jj);
 
-        for (int j = 0; j < blockSize; ++j) {
-            double sum = 0;
+                // Calcula um valor parcial da (j+jj)-esima coluna de C
+                for (int ii = 0; ii < n; ++ii) {
+                    double sum = 0;
 
-            for (int k = 0; k < n; ++k)
-                sum += A(j, k)*col[k];
+                    for (int k = 0; k < blockSize; ++k)
+                        sum += A(ii, i + k)*col[k];
 
-            C(j, i) += sum;
+                    C(ii, j + jj) += sum;
+                }
+            }
         }
     }
 
@@ -157,7 +171,7 @@ void print_matrix(unsigned n, double *restrict _M) {
     #define M(i, j) _M[n*(i) + (j)]
 
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) printf("%.2f ", M(i, j));
+        for (int j = 0; j < n; j++) printf("%7.2f ", M(i, j));
 
         printf("\n");
     }
