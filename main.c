@@ -115,7 +115,8 @@ int main(int argc, const char* argv[])
 
     timeval_subtract(&t3, &t2, &t1);
 
-    printf("%lu.%06lu\n", t3.tv_sec, t3.tv_usec);
+    // Result print modified for testing purposes
+    printf("%d;%lu.%06lu\n", n, t3.tv_sec, t3.tv_usec);
 
     free(A);
     free(B);
